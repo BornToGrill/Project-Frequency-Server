@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 using Lobby.Entities;
@@ -17,13 +18,14 @@ namespace Lobby {
 
     internal sealed class ServerLobby : IGetPlayer {
 
-        private readonly List<Player> _players;
+        private readonly ObservableCollection<Player> _players;
         private readonly TcpListener _tcpListener;
         private readonly UdpClient _udpClient;
         //private readonly MessageHandler;
 
         public ServerLobby(int port) {
-            _players = new List<Player>();
+            _players = new ObservableCollection<Player>();
+            _players.CollectionChanged += Players_CollectionChanged;
             _tcpListener = new TcpListener(port);
             _tcpListener.SocketAccepted += SocketAccepted;
             _tcpListener.Start();
@@ -34,6 +36,16 @@ namespace Lobby {
 
 
             Console.WriteLine("Server started listening on port : {0}", ((IPEndPoint)_tcpListener.Socket.LocalEndPoint).Port);
+        }
+
+        private void Players_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) {
+            lock(_players)
+                if (_players.Count == 0) {
+                    // TODO: Start timer.
+                }
+                else {
+                    // TODO: End timer.
+                }
         }
 
         #region Private Methods
@@ -103,7 +115,8 @@ namespace Lobby {
 
         public Player GetPlayer(string guid) {
             lock (_players)
-                return _players.Exists(x => x.Guid == guid) ? _players.Single(x => x.Guid == guid) : null;
+                return _players.FirstOrDefault(player => player.Guid == guid);
+            
         }
 
         public Player GetPlayer(Guid guid) {

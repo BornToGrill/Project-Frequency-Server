@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using NetworkLibrary;
 
 namespace LobbyController {
@@ -12,22 +7,41 @@ namespace LobbyController {
 
         private readonly UdpClient _client;
         private readonly ILobbyManager _manager;
+
         public CommunicationHandler(ILobbyManager lobbyManager) {
             _manager = lobbyManager;
             _client = new UdpClient(Properties.Settings.Default.DefaultPort);
-            _client.DataReceived += TcpClient_DataReceived;
+            _client.DataReceived += UdpClient_DataReceived;
             _client.Start();
 
         }
 
-        private void TcpClient_DataReceived(UdpDataReceivedEventArgs e) {
+        private void UdpClient_DataReceived(UdpDataReceivedEventArgs e) {
+            string[] readData = e.ReceivedString.Split(':');
+            switch (readData[0]) {
+                case "Request":
+                    HandleRequests(readData, e);
+                    break;
+                default:
+                    Console.WriteLine($"UDP Client received a message that could not be handled : {e.ReceivedString}");
+                    return;
+            }
 
-            switch (e.ReceivedString) {
+        }
+
+        private void HandleRequests(string[] values, UdpDataReceivedEventArgs e) {
+            if (values.Length < 2) {
+                Console.WriteLine($"Invalid Request message : {e.ReceivedString}");
+                return;
+            }
+            switch (values[1]) {
                 case "CreateLobby":
                     Create(e.Sender);
                     break;
+                default:
+                    Console.WriteLine($"No such request exists : {e.ReceivedString}");
+                    return;
             }
-
         }
 
         private async void Create(IPEndPoint sender) {
