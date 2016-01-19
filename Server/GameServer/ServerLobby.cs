@@ -5,35 +5,21 @@ using System.Linq;
 using System.Net;
 using Lobby.Entities;
 using NetworkLibrary;
-using TcpClient = NetworkLibrary.TcpClient;
-using TcpListener = NetworkLibrary.TcpListener;
-using UdpClient = NetworkLibrary.UdpClient;
+using Lobby.Interfaces;
 
 namespace Lobby {
 
-    internal interface IGetPlayer {
-        Player GetPlayer(string guid);
-        Player GetPlayer(Guid guid);
-    }
-
-    internal sealed class ServerLobby : IGetPlayer {
+    internal sealed class ServerLobby : IPlayerContainer {
 
         private readonly ObservableCollection<Player> _players;
         private readonly TcpListener _tcpListener;
         private readonly UdpClient _udpClient;
-        //private readonly MessageHandler;
+        private readonly CommunicationHandler _comHandler;
 
         public ServerLobby(int port) {
+            _comHandler = new CommunicationHandler(port, this);
             _players = new ObservableCollection<Player>();
             _players.CollectionChanged += Players_CollectionChanged;
-            _tcpListener = new TcpListener(port);
-            _tcpListener.SocketAccepted += SocketAccepted;
-            _tcpListener.Start();
-
-            _udpClient = new UdpClient(port);
-            _udpClient.DataReceived += UdpClient_DataReceived;
-            _udpClient.Start();
-
 
             Console.WriteLine("Server started listening on port : {0}", ((IPEndPoint)_tcpListener.Socket.LocalEndPoint).Port);
         }
@@ -121,6 +107,21 @@ namespace Lobby {
 
         public Player GetPlayer(Guid guid) {
             return GetPlayer(guid.ToString("N"));
+        }
+
+        public Player GetPlayer(TcpClient client) {
+            lock (_players)
+                return _players.FirstOrDefault(player => player.TcpClient == client);
+        }
+
+        public void AddPlayer(Player player) {
+            lock (_players)
+                _players.Add(player);
+        }
+
+        public void RemovePlayer(Player player) {
+            lock (_players)
+                _players.Remove(player);
         }
 
         #endregion

@@ -5,6 +5,7 @@ using System.Security.Principal;
 
 namespace Lobby {
     public class Lobby {
+
         public static void Main(string[] args) {
             if (args.Length <= 0)
                 throw new Exception("Lobby was not started by a named pipe server.");
