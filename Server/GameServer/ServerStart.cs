@@ -22,11 +22,12 @@ namespace Lobby {
             Console.WriteLine("Server lobby started");
 
             // TODO: First startup lobby then connect.
-
-            NamedPipeClientStream pipeClient = new NamedPipeClientStream(".", dict["name"], PipeDirection.InOut,
-                PipeOptions.None, TokenImpersonationLevel.Impersonation);
-            pipeClient.Connect(15000); //TODO: Timeout?
-            Console.WriteLine($"Client succesfully connected to pipe name : {dict["name"]}");
+            if (dict["name"] != "Headless-Client") { // TODO: Remove ! Params are set in Lobby debug settings.
+                NamedPipeClientStream pipeClient = new NamedPipeClientStream(".", dict["name"], PipeDirection.InOut,
+                    PipeOptions.None, TokenImpersonationLevel.Impersonation);
+                pipeClient.Connect(15000); //TODO: Timeout?
+                Console.WriteLine($"Client succesfully connected to pipe name : {dict["name"]}");
+            }
 
             Console.ReadLine();
 

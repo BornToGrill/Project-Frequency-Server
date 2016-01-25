@@ -9,7 +9,7 @@ using Lobby.Entities;
 using Lobby.Interfaces;
 using NetworkLibrary;
 
-namespace Lobby {
+namespace Lobby.Com_Handler {
     internal class CommunicationHandler {
 
         private readonly TcpListener _tcpListener;
@@ -38,7 +38,7 @@ namespace Lobby {
             player.TcpClient.DataReceived += TcpClient_DataReceived;
             player.TcpClient.Disconnected += Client_Disconnected;
             tcpClient.Start();
-            tcpClient.Send($"[{player.Guid}:Handshake]");
+            //tcpClient.Send($"[{player.Guid}:Handshake]");
 
             _playerContainer.AddPlayer(player);
         }
@@ -48,26 +48,8 @@ namespace Lobby {
         }
 
         private void UdpClient_DataReceived(UdpDataReceivedEventArgs e) {
-            // TODO : REMOVE
-            string[] message = e.ReceivedString.Split(':');
-            if (message.Length == 2 && message[1] == "Handshake") {
-                lock (_players)
-                    for (int i = 0; i < _players.Count; i++)
-                        if (_players[i].Guid == message[0]) {
-                            _players[i].UdpVerified = true;
-                            for (int x = 0; x < _players.Count; x++)
-                                if (_players[x].Guid != message[0])
-                                    _players[i].TcpClient.Send($"[{_players[x].Guid}:NewPlayer]");
-                        }
-                        else
-                            _players[i].TcpClient.Send($"[{message[0]}:NewPlayer]"); // NOTE: TCP message send back.
-                return;
-            }
 
-            lock (_players)
-                for (int i = 0; i < _players.Count; i++)
-                    if (!_players[i].ClientIp.Equals(e.Sender) && _players[i].UdpVerified)
-                        _udpClient.Send(e.ReceivedData, _players[i].ClientIp);
+
         }
 
         private void Client_Disconnected(TcpClient sender) {
