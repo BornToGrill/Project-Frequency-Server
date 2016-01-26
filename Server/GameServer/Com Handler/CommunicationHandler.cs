@@ -34,12 +34,21 @@ namespace Lobby.Com_Handler {
             Guid guid = Guid.NewGuid();
             TcpClient tcpClient = new TcpClient(e.Socket);
 
-            Player player = new Player(guid, tcpClient);
+            Player player = new Player(guid, tcpClient) {
+                Name = "Bert " + new Random().Next(100),
+                CornerId = _playerContainer.GetRandomCorner()
+            };
             player.TcpClient.DataReceived += TcpClient_DataReceived;
             player.TcpClient.Disconnected += Client_Disconnected;
             tcpClient.Start();
-            //tcpClient.Send($"[{player.Guid}:Handshake]");
-
+            tcpClient.Send($"[Invoke:Authenticated:{player.Guid}|{player.CornerId}|{player.Name}]");
+            var players = _playerContainer.GetPlayers();
+            string playersData = string.Empty;
+            lock (players) {
+                foreach (Player pl in players)
+                    playersData += "(" + pl.Name + "|" + pl.CornerId + ")";
+            }
+            tcpClient.Send($"[Invoke:SetPlayers:{playersData}]");
             _playerContainer.AddPlayer(player);
         }
         private void TcpClient_DataReceived(TcpDataReceivedEventArgs e) {
@@ -62,6 +71,7 @@ namespace Lobby.Com_Handler {
             if (player == null)
                 return;
             _playerContainer.RemovePlayer(player);
+            _playerContainer.AddCorner(player.CornerId);
             player.Dispose();
 
         }

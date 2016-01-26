@@ -3,6 +3,9 @@ using System.Net;
 using TcpClient = NetworkLibrary.TcpClient;
 namespace Lobby.Entities {
     internal class Player : IDisposable {
+
+        internal string Name { get; set; }
+        internal int CornerId { get; set; }
         internal string Guid { get; }
         internal TcpClient TcpClient { get; }
         internal IPEndPoint ClientIp { get; }
