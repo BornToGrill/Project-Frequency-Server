@@ -4,22 +4,26 @@ using System.Collections.Specialized;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
+using System.Security.Principal;
 using Lobby.Com_Handler;
+using Lobby.Com_Handler.Data_Processing.Types;
 using Lobby.Entities;
 using NetworkLibrary;
 using Lobby.Interfaces;
 
 namespace Lobby {
 
-    internal sealed class ServerLobby : IPlayerContainer {
+    internal sealed class ServerLobby : IPlayerContainer, INotifiable {
 
         private readonly ObservableCollection<Player> _players;
         private readonly CommunicationHandler _comHandler;
 
-        private List<int> _corners = Enumerable.Range(1, 4).ToList(); 
+        private List<int> _corners = Enumerable.Range(1, 4).ToList();
+
+        private Player _currentPlayer;
 
         public ServerLobby(int port) {
-            _comHandler = new CommunicationHandler(port, this);
+            _comHandler = new CommunicationHandler(port, this, this);
             _players = new ObservableCollection<Player>();
             _players.CollectionChanged += Players_CollectionChanged;
 
@@ -96,6 +100,38 @@ namespace Lobby {
                 _corners.Add(id);
         }
 
+        #endregion
+        #region INotifiable Implementation Members
+        public void EndTurn(string guid) {
+            lock (_currentPlayer) {
+                if (_currentPlayer.Guid != guid) {
+                    Player player = GetPlayer(guid);
+                    player.TcpClient.Send("[Error:Can't end turn if it's not your turn...]"); //TODO: Resources
+                }
+                lock (_players) {
+                    Player next = _players.SingleOrDefault(x => x.CornerId == _currentPlayer.CornerId + 1);
+                    if (next != null)
+                        _currentPlayer = next;
+                    else
+                        _currentPlayer = _players.Single(x => x.CornerId == 1); //TODO: stabilize
+                    foreach(Player player in _players)
+                        player.TcpClient.Send($"[Notify:TurnEnd:{_currentPlayer.CornerId}|{_currentPlayer.Name}]");
+                }
+            }
+            Console.WriteLine("Turn ended");
+        }
+
+        public void MoveUnit(string guid, string tileOne, string tileTwo) {
+            throw new NotImplementedException();
+        }
+
+        public void CreateUnit(string guid, string tileTarget) {
+            throw new NotImplementedException();
+        }
+
+        public void AttackUnit(string guid, string tileOne, string tileTwo) {
+            throw new NotImplementedException();
+        }
         #endregion
     }
 }

@@ -5,6 +5,8 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Lobby.Com_Handler.Data_Processing;
+using Lobby.Com_Handler.Data_Processing.Types;
 using Lobby.Entities;
 using Lobby.Interfaces;
 using NetworkLibrary;
@@ -16,7 +18,9 @@ namespace Lobby.Com_Handler {
         private readonly UdpClient _udpClient;
         private readonly IPlayerContainer _playerContainer;
 
-        public CommunicationHandler(int port, IPlayerContainer container) { // TODO: Interface ILobby
+        private readonly DataProcessor _processor;
+
+        public CommunicationHandler(int port, IPlayerContainer container, INotifiable notify) { // TODO: Interface ILobby
 
             _playerContainer = container;
             _tcpListener = new TcpListener(port);
@@ -26,6 +30,8 @@ namespace Lobby.Com_Handler {
             _udpClient = new UdpClient(port);
             _udpClient.DataReceived += UdpClient_DataReceived;
             _udpClient.Start();
+
+            _processor = new DataProcessor(notify);
         }
 
         private void SocketAccepted(SocketAcceptedEventArgs e) {
@@ -52,7 +58,8 @@ namespace Lobby.Com_Handler {
             _playerContainer.AddPlayer(player);
         }
         private void TcpClient_DataReceived(TcpDataReceivedEventArgs e) {
-
+            if (e.ReceivedData.Length > 0)
+                _processor.ProcessMessage(e.Sender, e.ReceivedString);
 
         }
 

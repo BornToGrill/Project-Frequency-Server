@@ -48,6 +48,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Com Handler\CommunicationHandler.cs" />
+    <Compile Include="Com Handler\Data Processing\DataProcessor.cs" />
+    <Compile Include="Com Handler\Data Processing\Types\INotifiable.cs" />
+    <Compile Include="Com Handler\Data Processing\Types\Notify.cs" />
     <Compile Include="Com Handler\DataDeserializer.cs" />
     <Compile Include="Entities\Player.cs" />
     <Compile Include="Interfaces\IPlayerContainer.cs" />
