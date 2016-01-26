@@ -58,6 +58,7 @@ namespace Lobby.Com_Handler {
             _playerContainer.AddPlayer(player);
         }
         private void TcpClient_DataReceived(TcpDataReceivedEventArgs e) {
+            Console.WriteLine("Received : " + e.ReceivedString);
             if (e.ReceivedData.Length > 0)
                 _processor.ProcessMessage(e.Sender, e.ReceivedString);
 

@@ -37,8 +37,9 @@ namespace Lobby {
                     return;
                 foreach (Player player in _players) {
                     Player joined = (Player) e.NewItems[0];
-                    if (player != joined)
-                        player.TcpClient.Send($"[Invoke:PlayerJoined:{_players.IndexOf(joined) + 1}|{joined.Name}]");
+                    if (player != joined) {
+                        player.TcpClient.Send($"[Notify:PlayerJoined:{_players.IndexOf(joined) + 1}|{joined.Name}]");
+                    }
                 }
             }
             // TODO: ^^^^
@@ -48,7 +49,8 @@ namespace Lobby {
                 }
                 else if (_players.Count == 2) { //TODO: REMOVE
                     foreach (Player player in _players)
-                        player.TcpClient.Send("Invoke:StartGame");
+                        player.TcpClient.Send("[Invoke:StartGame]");
+                    _currentPlayer = _players[0];
                 }
                 else {
                     // TODO: End timer.
@@ -108,17 +110,20 @@ namespace Lobby {
                     Player player = GetPlayer(guid);
                     player.TcpClient.Send("[Error:Can't end turn if it's not your turn...]"); //TODO: Resources
                 }
-                lock (_players) {
-                    Player next = _players.SingleOrDefault(x => x.CornerId == _currentPlayer.CornerId + 1);
-                    if (next != null)
-                        _currentPlayer = next;
-                    else
-                        _currentPlayer = _players.Single(x => x.CornerId == 1); //TODO: stabilize
-                    foreach(Player player in _players)
-                        player.TcpClient.Send($"[Notify:TurnEnd:{_currentPlayer.CornerId}|{_currentPlayer.Name}]");
+                else {
+                    lock (_players) {
+                        int currentIndex = _players.IndexOf(_currentPlayer) + 1;
+                        if (currentIndex > _players.Count - 1)
+                            currentIndex = 0;
+
+                        _currentPlayer = _players[currentIndex];
+                        foreach (Player player in _players)
+                            player.TcpClient.Send($"[Notify:TurnEnd:{_currentPlayer.CornerId}|{_currentPlayer.Name}]");
+                    }
+                    Console.WriteLine("Turn ended");
                 }
             }
-            Console.WriteLine("Turn ended");
+
         }
 
         public void MoveUnit(string guid, string tileOne, string tileTwo) {

@@ -208,11 +208,15 @@ namespace NetworkLibrary {
             try {
                 int received = Socket.EndReceiveFrom(result, ref sender);
                 if (received > 0) {
-                    if(received > BufferSize)
-                        throw new OverflowException("More data was received than the UDP buffer can store.");   // TODO : Globalization
+                    if (received > BufferSize)
+                        throw new OverflowException("More data was received than the UDP buffer can store.");
+                            // TODO : Globalization
                     byte[] data = new byte[received];
                     Buffer.BlockCopy(_buffer, 0, data, 0, received);
-                    DataReceived?.Invoke(new UdpDataReceivedEventArgs((IPEndPoint)sender, data, Encoding));
+                    DataReceived?.Invoke(new UdpDataReceivedEventArgs((IPEndPoint) sender, data, Encoding));
+                }
+                else {
+                    Disconnected?.Invoke((IPEndPoint)sender);
                 }
                 Socket.BeginReceiveFrom(_buffer, 0, BufferSize, 0, ref sender, Callback, sender);
             }

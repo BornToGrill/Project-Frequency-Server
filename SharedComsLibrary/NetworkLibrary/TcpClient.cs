@@ -102,6 +102,11 @@ namespace NetworkLibrary {
                         Array.Resize(ref buffer, received);
                     DataReceived?.Invoke(new TcpDataReceivedEventArgs(this, buffer, Encoding));
                 }
+                else {
+                    Disconnected?.Invoke(this);
+                    Close();
+                    return;
+                }
 
                 Socket.BeginReceive(new byte[] { 0 }, 0, 0, 0, Callback, Socket);
             }
