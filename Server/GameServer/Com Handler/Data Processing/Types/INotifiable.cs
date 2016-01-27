@@ -6,5 +6,6 @@
         void MoveUnit(string guid, string moveType, string tileOne, string tileTwo);
         void CreateUnit(string guid, string tileTarget, string unitType);
         void AttackUnit(string guid, string tileOne, string tileTwo);
+        void CashChanged(string guid, int newValue);
     }
 }

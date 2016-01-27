@@ -38,7 +38,8 @@ namespace Lobby {
                 foreach (Player player in _players) {
                     Player joined = (Player) e.NewItems[0];
                     if (player != joined) {
-                        player.TcpClient.Send($"[Notify:PlayerJoined:{_players.IndexOf(joined) + 1}|{joined.Name}]");
+                        player.TcpClient.Send($"[Notify:PlayerJoined:{joined.CornerId}|{joined.Name}]");
+                        player.TcpClient.Send($"[Lobby:PlayerJoined:{joined.CornerId}|{joined.Name}]");
                     }
                 }
             }
@@ -152,9 +153,15 @@ namespace Lobby {
                     foreach (Player player in _players.Where(x => x != _currentPlayer))
                         player.TcpClient.Send($"[Invoke:CreateUnit:{tileTarget}|{unitType}|{_currentPlayer.CornerId}]");
             }
+        }
 
-
-
+        public void CashChanged(string guid, int newValue) {
+            lock (_players) {
+                int id = GetPlayer(guid).CornerId;
+                foreach (Player player in _players.Where(x => x.Guid != guid)) {
+                    player.TcpClient.Send($"[Invoke:CashChanged:{id}|{newValue}]");
+                }
+            }
         }
 
         public void AttackUnit(string guid, string tileOne, string tileTwo) {
