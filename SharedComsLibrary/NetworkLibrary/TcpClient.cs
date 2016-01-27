@@ -97,7 +97,7 @@ namespace NetworkLibrary {
                 byte[] buffer = new byte[BufferSize];
                 int received = Socket.Receive(buffer, buffer.Length, 0);
 
-                if (buffer.Length > 0) {
+                if (received > 0) {
                     if (received < buffer.Length)
                         Array.Resize(ref buffer, received);
                     DataReceived?.Invoke(new TcpDataReceivedEventArgs(this, buffer, Encoding));
