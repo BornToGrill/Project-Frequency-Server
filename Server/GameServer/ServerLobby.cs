@@ -47,10 +47,13 @@ namespace Lobby {
                 if (_players.Count == 0) {
                     // TODO: Start timer.
                 }
-                else if (_players.Count == 2) { //TODO: REMOVE
-                    foreach (Player player in _players)
-                        player.TcpClient.Send("[Invoke:StartGame]");
+                else if (_players.Count == 2) { //TODO: REMOVE let lobby decide (ready states)
                     _currentPlayer = _players[0];
+                    foreach (Player player in _players) {
+                        player.TcpClient.Send("[Invoke:StartGame]");
+                        lock(_currentPlayer)
+                            player.TcpClient.Send($"[Notify:TurnEnd:{_currentPlayer.CornerId}|{_currentPlayer.Name}]");
+                    }
                 }
                 else {
                     // TODO: End timer.
@@ -126,12 +129,32 @@ namespace Lobby {
 
         }
 
-        public void MoveUnit(string guid, string tileOne, string tileTwo) {
-            throw new NotImplementedException();
+        public void MoveUnit(string guid, string moveType, string tileOne, string tileTwo) {
+            lock (_currentPlayer) {
+                if (_currentPlayer.Guid != guid) {
+                    GetPlayer(guid).TcpClient.Send("[Error:Bitches can't be movin on other turns]");
+                    return;
+                }
+                lock (_players)
+                   foreach (Player player in _players.Where(x => x != _currentPlayer))
+                        player.TcpClient.Send($"[Invoke:{moveType}:{tileOne}|{tileTwo}]");
+            }
+            
         }
 
-        public void CreateUnit(string guid, string tileTarget) {
-            throw new NotImplementedException();
+        public void CreateUnit(string guid, string tileTarget, string unitType) {
+            lock (_currentPlayer) {
+                if (_currentPlayer.Guid != guid) {
+                    GetPlayer(guid).TcpClient.Send("[Error:Can't create unit because it's not your turn]");
+                    return;
+                }
+                lock (_players)
+                    foreach (Player player in _players.Where(x => x != _currentPlayer))
+                        player.TcpClient.Send($"[Invoke:CreateUnit:{tileTarget}|{unitType}|{_currentPlayer.CornerId}]");
+            }
+
+
+
         }
 
         public void AttackUnit(string guid, string tileOne, string tileTwo) {
