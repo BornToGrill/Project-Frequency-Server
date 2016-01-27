@@ -24,7 +24,9 @@ namespace Lobby.Com_Handler.Data_Processing.Types {
                     _notify.EndTurn(data.Item2);
                     break;
                 case "MoveToEmpty":
-                    MoveToEmpty(data.Item2);
+                case "MoveToMerge":
+                case "MoveToAttack":
+                    MoveUnit(data.Item1, data.Item2);
                     break;
                 case "UnitCreated":
                     CreateUnit(data.Item2);
@@ -32,6 +34,10 @@ namespace Lobby.Com_Handler.Data_Processing.Types {
             }
         }
 
+        private void MoveUnit(string action, string values) {
+            string[] data = values.Split(ValueDelimiter);
+            _notify.MoveUnit(data[0], action, data[1], data[2]);
+        }
         private void MoveToEmpty(string values) {
             string[] data = values.Split(ValueDelimiter);
             _notify.MoveUnit(data[0], "MoveToEmpty", data[1], data[2]);
