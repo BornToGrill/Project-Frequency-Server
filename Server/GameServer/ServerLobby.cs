@@ -24,8 +24,11 @@ namespace Lobby {
 
         private bool _gameStarted;
 
-        public ServerLobby(int port) {
-            _comHandler = new CommunicationHandler(port, this, this);
+        private readonly string _lobbyId;
+
+        public ServerLobby(string id, int port) {
+            _lobbyId = id;
+            _comHandler = new CommunicationHandler(id, port, this, this);
             _players = new ObservableCollection<Player>();
             _players.CollectionChanged += Players_CollectionChanged;
 

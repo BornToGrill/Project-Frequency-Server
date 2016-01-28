@@ -19,8 +19,10 @@ namespace Lobby.Com_Handler {
         private readonly IPlayerContainer _playerContainer;
 
         private readonly DataProcessor _processor;
+        private readonly string lobbyId;
 
-        public CommunicationHandler(int port, IPlayerContainer container, INotifiable notify) { // TODO: Interface ILobby
+        public CommunicationHandler(string id, int port, IPlayerContainer container, INotifiable notify) { // TODO: Interface ILobby
+            lobbyId = id;
 
             _playerContainer = container;
             _tcpListener = new TcpListener(port);
@@ -57,7 +59,7 @@ namespace Lobby.Com_Handler {
             }
             playersData = playersData.TrimEnd('|');
             tcpClient.Send($"[Lobby:SetPlayers:{playersData}]");
-            tcpClient.Send($"[Lobby:Authenticated:{player.Guid}|{player.CornerId}|{player.Name}]");
+            tcpClient.Send($"[Lobby:Authenticated:{player.Guid}|{player.CornerId}|{player.Name}|{lobbyId}]");
             _playerContainer.AddPlayer(player);
         }
         private void TcpClient_DataReceived(TcpDataReceivedEventArgs e) {

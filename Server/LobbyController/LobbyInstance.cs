@@ -10,12 +10,12 @@ namespace LobbyController {
     public class LobbyInstance : IDisposable {
 
         public readonly NamedPipeServerStream PipeServer;
-        public readonly int Id;
+        public readonly string Id;
         public readonly int Port;
         
         public IPEndPoint ServerIp { get; set; }
 
-        public delegate void ClientConnectedEventHandler(LobbyInstance sender, int clientId);
+        public delegate void ClientConnectedEventHandler(LobbyInstance sender, string clientId);
         public event ClientConnectedEventHandler ClientConnected;
 
         public delegate void ClientDisconnectedEventHandler(LobbyInstance sender);
@@ -28,7 +28,7 @@ namespace LobbyController {
 
         private readonly byte[] _buffer = new byte[8192];
 
-        public LobbyInstance(int id, int port) {
+        public LobbyInstance(string id, int port) {
             Id = id;
             Port = port;
             PipeServer = new NamedPipeServerStream(id.ToString(), PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
@@ -48,8 +48,8 @@ namespace LobbyController {
             PipeServer.EndWaitForConnection(result);
             ClientConnected?.Invoke(this, Id);
             IPEndPoint server = new IPEndPoint(IPAddress.Parse(Properties.Settings.Default.RemoteIP), Port);
-            LobbyInitialized?.TrySetResult(server);
             ServerIp = server;
+            LobbyInitialized?.TrySetResult(server);
             PipeServer.BeginRead(_buffer, 0, 0, ReadCallback, null);
         }
 

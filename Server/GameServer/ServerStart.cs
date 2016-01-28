@@ -18,7 +18,7 @@ namespace Lobby {
                 dict.Add(args[i].TrimStart('-'), args[i + 1]);
             }
 
-            ServerLobby lobby = new ServerLobby(int.Parse(dict["port"]));
+            ServerLobby lobby = new ServerLobby(dict["name"], int.Parse(dict["port"]));
             Console.WriteLine("Server lobby started");
 
             // TODO: First startup lobby then connect.

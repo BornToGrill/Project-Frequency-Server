@@ -14,13 +14,11 @@ namespace LobbyController {
 
         private const int MaxServers = 100;
         private readonly List<int> _availablePorts;
-        private readonly List<int> _availableIds;
         private readonly CommunicationHandler _comHandler;
 
         public LobbyManager() {
             Lobbies = new List<LobbyInstance>();
             _availablePorts = Enumerable.Range(9501, MaxServers).ToList();
-            _availableIds = Enumerable.Range(1, MaxServers).ToList();
             _comHandler = new CommunicationHandler(this, this);
         }
 
@@ -29,20 +27,24 @@ namespace LobbyController {
         #endregion
 
         #region IRequestable Implementation Members
+
         public Task<IPEndPoint> CreateLobby() {
-            int id;
+            string id;
             int port;
             // Get lobby id & port.
-            lock (_availableIds)
-                lock (_availablePorts) {
-                    if (_availableIds.Count == 0 || _availablePorts.Count == 0)
-                        return Task.FromResult<IPEndPoint>(null);
-                    id = _availableIds.First();
-                    port = _availablePorts.First();
-                    _availableIds.RemoveAt(0);
-                    _availablePorts.RemoveAt(0);
-                }
-            // Create lobby and start listening for clients
+            lock (_availablePorts) {
+                if (_availablePorts.Count == 0)
+                    return Task.FromResult<IPEndPoint>(null);
+                port = _availablePorts.First();
+                _availablePorts.RemoveAt(0);
+            }
+            lock (Lobbies) {
+                do {
+                    id = Guid.NewGuid().ToString("N").ToUpper().Substring(0, 6);
+                } while (Lobbies.Exists(x => x.Id == id));
+            }
+
+        // Create lobby and start listening for clients
             LobbyInstance instance = new LobbyInstance(id, port);
             instance.ClientConnected += LobbyCreationCompleted;
             instance.ClientDisconnected += LobbySessionEnded;
@@ -66,7 +68,7 @@ namespace LobbyController {
         public IPEndPoint JoinLobby(string lobbyId) {
             lock (Lobbies) {
                 foreach(LobbyInstance lobby in Lobbies)
-                    if (lobby.Id.ToString() == lobbyId)
+                    if (lobby.Id == lobbyId)
                         return lobby.ServerIp;
             }
             return null;
@@ -81,20 +83,18 @@ namespace LobbyController {
                 Lobbies.Clear();
             }
         }
-        private void LobbyCreationCompleted(LobbyInstance sender, int clientId) {
+        private void LobbyCreationCompleted(LobbyInstance sender, string clientId) {
             lock (Lobbies)
                 Lobbies.Add(sender);
         }
 
         private void LobbySessionEnded(LobbyInstance sender) {
-            lock (Lobbies) 
-                lock(_availableIds)
-                    lock (_availablePorts) {
-                        _availableIds.Add(sender.Id);
-                        _availablePorts.Add(sender.Port);
-                        Lobbies.Remove(sender);
-                        sender.Dispose();
-                    }
+            lock (Lobbies)
+                lock (_availablePorts) {
+                    _availablePorts.Add(sender.Port);
+                    Lobbies.Remove(sender);
+                    sender.Dispose();
+                }
         }
         #endregion
 
