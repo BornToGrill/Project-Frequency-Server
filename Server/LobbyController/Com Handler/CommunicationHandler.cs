@@ -9,12 +9,12 @@ namespace LobbyController.Com_Handler {
         private readonly UdpClient _client;
         private readonly DataProcessor _processor;
 
-        public CommunicationHandler(IInvokable invokable) {
-            _processor = new DataProcessor(_client, invokable);
-
+        public CommunicationHandler(IInvokable invokable, IRequestable requestable) {
             _client = new UdpClient(Properties.Settings.Default.DefaultPort);
             _client.DataReceived += UdpClient_DataReceived;
             _client.Start();
+
+            _processor = new DataProcessor(_client, invokable, requestable);
 
         }
 

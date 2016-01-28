@@ -8,7 +8,7 @@ using LobbyController.Com_Handler;
 using LobbyController.Interfaces;
 
 namespace LobbyController {
-    class LobbyManager : IDisposable, IInvokable {
+    class LobbyManager : IDisposable, IInvokable, IRequestable {
 
         internal List<LobbyInstance> Lobbies;
 
@@ -21,16 +21,19 @@ namespace LobbyController {
             Lobbies = new List<LobbyInstance>();
             _availablePorts = Enumerable.Range(9501, MaxServers).ToList();
             _availableIds = Enumerable.Range(1, MaxServers).ToList();
-            _comHandler = new CommunicationHandler(this);
+            _comHandler = new CommunicationHandler(this, this);
         }
 
-        #region ILobbyManager Implementation Members
+        #region IInvokable Implementation Members
 
+        #endregion
+
+        #region IRequestable Implementation Members
         public Task<IPEndPoint> CreateLobby() {
             int id;
             int port;
             // Get lobby id & port.
-            lock(_availableIds)
+            lock (_availableIds)
                 lock (_availablePorts) {
                     if (_availableIds.Count == 0 || _availablePorts.Count == 0)
                         return Task.FromResult<IPEndPoint>(null);
@@ -53,12 +56,20 @@ namespace LobbyController {
                 //CreateNoWindow = true
             };
             Process.Start(process);
+
+            lock(Lobbies)
+                Lobbies.Add(instance); // TODO: Not here
             // Wait for the client connection and return the IPendpoint of the client.
             return instance.LobbyInitialized.Task;
         }
 
-        public bool JoinLobby(string lobbyId) {
-            throw new NotImplementedException("It seems you've got a really lazy developer on your hands.");
+        public IPEndPoint JoinLobby(string lobbyId) {
+            lock (Lobbies) {
+                foreach(LobbyInstance lobby in Lobbies)
+                    if (lobby.Id.ToString() == lobbyId)
+                        return lobby.ServerIp;
+            }
+            return null;
         }
         #endregion
 

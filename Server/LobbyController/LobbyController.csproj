@@ -53,6 +53,8 @@
     <Compile Include="Com Handler\DataDeserializer.cs" />
     <Compile Include="Com Handler\DataProcessing\DataProcessor.cs" />
     <Compile Include="Com Handler\DataProcessing\Types\Invoke.cs" />
+    <Compile Include="Com Handler\DataProcessing\Types\Request.cs" />
+    <Compile Include="Interfaces\IRequestable.cs" />
     <Compile Include="Resources\ErrorStrings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

@@ -8,9 +8,11 @@ namespace LobbyController.Com_Handler.DataProcessing {
     internal class DataProcessor {
 
         private readonly Invoke _invoke;
+        private readonly Request _request;
 
-        internal DataProcessor(UdpClient client, IInvokable invoke) {
+        internal DataProcessor(UdpClient client, IInvokable invoke, IRequestable request) {
             _invoke = new Invoke(client, invoke);
+            _request = new Request(client, request);
         }
 
         internal void ProcessMessage(IPEndPoint sender, string message) {
@@ -20,7 +22,9 @@ namespace LobbyController.Com_Handler.DataProcessing {
                 case "Invoke":
                     _invoke.HandleInvoke(sender, data.Item2);
                     break;
-
+                case "Request":
+                    _request.HandleRequest(sender, data.Item2);
+                    break;
                 default:
                     Console.WriteLine($"UDP Client received a message that could not be handled : {message}");
                     return;

@@ -18,22 +18,11 @@ namespace LobbyController.Com_Handler.DataProcessing.Types {
             //TODO: On every GetFirst call check for string length etc...
             var data = values.GetFirst();
             switch (data.Item1) {
-                case "CreateLobby":
-                    Create(sender);
-                    break;
                 default:
                     Console.WriteLine($"UDP Client received a message that could not be handled: at HandleInvoke : {values}");
                     return;
             }
 
-        }
-
-        private async void Create(IPEndPoint sender) {
-            IPEndPoint lobby = await _invoke.CreateLobby();
-            if (lobby != null)
-                _client.SendResponse(sender, lobby);
-            else
-                _client.SendError(sender, Resources.ErrorStrings.MaxLobbiesReached);
         }
     }
 }

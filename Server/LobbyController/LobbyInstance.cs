@@ -12,6 +12,8 @@ namespace LobbyController {
         public readonly NamedPipeServerStream PipeServer;
         public readonly int Id;
         public readonly int Port;
+        
+        public IPEndPoint ServerIp { get; set; }
 
         public delegate void ClientConnectedEventHandler(LobbyInstance sender, int clientId);
         public event ClientConnectedEventHandler ClientConnected;
@@ -45,7 +47,9 @@ namespace LobbyController {
         private void ConnectionCallback(IAsyncResult result) {
             PipeServer.EndWaitForConnection(result);
             ClientConnected?.Invoke(this, Id);
-            LobbyInitialized?.TrySetResult(new IPEndPoint(IPAddress.Parse(Properties.Settings.Default.RemoteIP), Port));
+            IPEndPoint server = new IPEndPoint(IPAddress.Parse(Properties.Settings.Default.RemoteIP), Port);
+            LobbyInitialized?.TrySetResult(server);
+            ServerIp = server;
             PipeServer.BeginRead(_buffer, 0, 0, ReadCallback, null);
         }
 

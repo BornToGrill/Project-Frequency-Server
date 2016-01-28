@@ -8,7 +8,5 @@ using System.Threading.Tasks;
 namespace LobbyController.Interfaces {
     internal interface IInvokable {
 
-        Task<IPEndPoint> CreateLobby();
-        bool JoinLobby(string lobbyId);
     }
 }
