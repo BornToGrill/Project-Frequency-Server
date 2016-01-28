@@ -22,6 +22,8 @@ namespace Lobby {
 
         private Player _currentPlayer;
 
+        private bool _gameStarted;
+
         public ServerLobby(int port) {
             _comHandler = new CommunicationHandler(port, this, this);
             _players = new ObservableCollection<Player>();
@@ -35,12 +37,11 @@ namespace Lobby {
             lock (_players) {
                 if (e.NewItems == null)
                     return;
+
                 foreach (Player player in _players) {
                     Player joined = (Player) e.NewItems[0];
-                    if (player != joined) {
-                        player.TcpClient.Send($"[Notify:PlayerJoined:{joined.CornerId}|{joined.Name}]");
+                    if (player != joined)
                         player.TcpClient.Send($"[Lobby:PlayerJoined:{joined.CornerId}|{joined.Name}]");
-                    }
                 }
             }
             // TODO: ^^^^
@@ -48,20 +49,12 @@ namespace Lobby {
                 if (_players.Count == 0) {
                     // TODO: Start timer.
                 }
-                else if (_players.Count == 2) { //TODO: REMOVE let lobby decide (ready states)
-                    _currentPlayer = _players[0];
-                    foreach (Player player in _players) {
-                        player.TcpClient.Send("[Invoke:StartGame]");
-                        lock(_currentPlayer)
-                            player.TcpClient.Send($"[Notify:TurnEnd:{_currentPlayer.CornerId}|{_currentPlayer.Name}]");
-                    }
-                }
                 else {
                     // TODO: End timer.
                 }
         }
 
-        #region IGetPlayer Implementation Members
+        #region IPlayerContainer Implementation Members
 
         public Player GetPlayer(string guid) {
             lock (_players)
@@ -88,8 +81,15 @@ namespace Lobby {
         }
 
         public void RemovePlayer(Player player) {
-            lock (_players)
+            lock (_players) {
                 _players.Remove(player);
+                foreach (Player pl in _players)
+                    if (_gameStarted)
+                        pl.TcpClient.Send("[Notify:PlayerLeft.....]"); //TODO
+                    else
+                        pl.TcpClient.Send($"[Lobby:PlayerLeft:{player.CornerId}|{player.Name}]");
+            }
+
         }
 
         public int GetRandomCorner() {
@@ -108,6 +108,23 @@ namespace Lobby {
 
         #endregion
         #region INotifiable Implementation Members
+
+        public void StartGame(string guid) {
+            if (_gameStarted)
+                return;
+            _gameStarted = true;
+            lock (_players) {
+                _currentPlayer = _players[0];
+                string playersData = string.Empty;
+                foreach (Player pl in _players)
+                    playersData += "(" + pl.Name + "|" + pl.CornerId + ")";
+
+                foreach (Player player in _players) {
+                    player.TcpClient.Send($"[Lobby:StartGame:{playersData}]");
+                }
+            }
+        }
+
         public void EndTurn(string guid) {
             lock (_currentPlayer) {
                 if (_currentPlayer.Guid != guid) {

@@ -82,8 +82,9 @@ namespace NetworkLibrary {
                 SocketAccepted?.Invoke(new SocketAcceptedEventArgs(s));
                 Socket.BeginAccept(Callback, Socket);
             }
-            catch {
+            catch (Exception ex){
                 Console.WriteLine("Unhandled exception in TcpListener class : TODO");
+                
                 throw;
                 // TODO: Exception handling
             }

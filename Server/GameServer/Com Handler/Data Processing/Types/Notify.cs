@@ -34,7 +34,14 @@ namespace Lobby.Com_Handler.Data_Processing.Types {
                 case "CashChanged":
                     CashChanged(data.Item2);
                     break;
+                case "GameStart":
+                    GameStart(data.Item2);
+                    break;
             }
+        }
+
+        private void GameStart(string values) {
+            _notify.StartGame(values);
         }
 
         private void MoveUnit(string action, string values) {

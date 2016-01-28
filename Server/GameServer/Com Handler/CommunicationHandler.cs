@@ -47,14 +47,17 @@ namespace Lobby.Com_Handler {
             player.TcpClient.DataReceived += TcpClient_DataReceived;
             player.TcpClient.Disconnected += Client_Disconnected;
             tcpClient.Start();
-            tcpClient.Send($"[Invoke:Authenticated:{player.Guid}|{player.CornerId}|{player.Name}]");
+            
+            
             var players = _playerContainer.GetPlayers();
             string playersData = string.Empty;
             lock (players) {
                 foreach (Player pl in players)
-                    playersData += "(" + pl.Name + "|" + pl.CornerId + ")";
+                    playersData += $"{pl.Name}|";
             }
-            tcpClient.Send($"[Invoke:SetPlayers:{playersData}]");
+            playersData = playersData.TrimEnd('|');
+            tcpClient.Send($"[Lobby:SetPlayers:{playersData}]");
+            tcpClient.Send($"[Lobby:Authenticated:{player.Guid}|{player.CornerId}|{player.Name}]");
             _playerContainer.AddPlayer(player);
         }
         private void TcpClient_DataReceived(TcpDataReceivedEventArgs e) {

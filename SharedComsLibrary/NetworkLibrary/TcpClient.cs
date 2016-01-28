@@ -107,7 +107,6 @@ namespace NetworkLibrary {
                     Close();
                     return;
                 }
-
                 Socket.BeginReceive(new byte[] { 0 }, 0, 0, 0, Callback, Socket);
             }
             catch (SocketException) {
