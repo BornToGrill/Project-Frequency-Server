@@ -39,31 +39,12 @@ namespace Lobby.Com_Handler {
         private void SocketAccepted(SocketAcceptedEventArgs e) {
             IPEndPoint sender = (IPEndPoint)e.Socket.RemoteEndPoint;
             Console.WriteLine("Client connected at address : {0}:{1}", sender.Address, sender.Port);
-            //Guid guid = Guid.NewGuid();
             TcpClient tcpClient = new TcpClient(e.Socket);
 
-            //Player player = new Player(guid, tcpClient) {
-            //    Name = "Bert " + new Random().Next(100),
-            //    CornerId = _playerContainer.GetRandomCorner()
-            //};
-            //player.TcpClient.DataReceived += TcpClient_DataReceived;
-            //player.TcpClient.Disconnected += Client_Disconnected;
-            //tcpClient.Start();
             tcpClient.DataReceived += TcpClient_DataReceived;
             tcpClient.Disconnected += Client_Disconnected;
             tcpClient.Start();
 
-
-            /*var players = _playerContainer.GetPlayers();
-            string playersData = string.Empty;
-            lock (players) {
-                foreach (Player pl in players)
-                    playersData += $"{pl.Name}|";
-            }
-            playersData = playersData.TrimEnd('|');
-            tcpClient.Send($"[Lobby:SetPlayers:{playersData}]");
-            tcpClient.Send($"[Lobby:Authenticated:{player.Guid}|{player.CornerId}|{player.Name}|{lobbyId}]");
-            _playerContainer.AddPlayer(player);*/
         }
         private void TcpClient_DataReceived(TcpDataReceivedEventArgs e) {
             Console.WriteLine("Received : " + e.ReceivedString);

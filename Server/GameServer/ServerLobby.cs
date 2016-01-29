@@ -124,7 +124,14 @@ namespace Lobby {
                 Name = name,
                 CornerId = corner
             };
-            player.TcpClient.Send($"[Response:Authenticated:{player.Guid}|{player.CornerId}|{player.Name}|{_lobbyId}]");
+            string playersData = string.Empty;
+            lock (_players) {
+                foreach (Player pl in _players)
+                    playersData += $"{pl.Name}|";
+            }
+            playersData = playersData.TrimEnd('|');
+            player.TcpClient.Send($"[Response:Authenticated:{player.Guid}|{player.CornerId}|{player.Name}|{_lobbyId}] +" +
+                                  $"[Response:SetPlayers:{playersData}]");
             AddPlayer(player);
         }
 
