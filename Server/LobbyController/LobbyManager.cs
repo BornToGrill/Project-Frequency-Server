@@ -135,6 +135,7 @@ namespace LobbyController {
         }
 
         private void LobbySessionEnded(LobbyInstance sender) {
+            Console.WriteLine($"Lobby instance with ID : <{sender.Id}> has shut down. Freeing up port.");
             lock (Lobbies)
                 lock (_availablePorts) {
                     _availablePorts.Add(sender.Port);

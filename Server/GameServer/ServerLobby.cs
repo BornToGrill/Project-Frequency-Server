@@ -207,8 +207,16 @@ namespace Lobby {
             }
         }
 
-        public void AttackUnit(string guid, string tileOne, string tileTwo) {
-            throw new NotImplementedException();
+        public void GameWon(string guid) {
+            _gameStarted = false;
+            lock (_players) {
+                Player winner = GetPlayer(guid);
+                string response = winner.CornerId + "|" +
+                                  string.Join("|", _players.Where(x => x != winner).Select(c => c.CornerId).ToArray());
+                foreach(Player player in _players)
+                    player.TcpClient.Send($"[Notify:GameWon:{response}]");
+
+            }
         }
         #endregion
     }

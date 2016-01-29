@@ -36,6 +36,9 @@ namespace Lobby.Com_Handler.Data_Processing.Types {
                 case "GameStart":
                     GameStart(data.Item2);
                     break;
+                case "GameWon":
+                    GameWon(data.Item2);
+                    break;
             }
         }
 
@@ -64,6 +67,10 @@ namespace Lobby.Com_Handler.Data_Processing.Types {
         private void CashChanged(string values) {
             string[] data = values.Split(ValueDelimiter);
             _notify.CashChanged(data[0], Int32.Parse(data[1]));
+        }
+
+        private void GameWon(string values) {
+            _notify.GameWon(values);
         }
     }
 }
