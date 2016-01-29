@@ -97,6 +97,8 @@ namespace Lobby {
 
         public int GetRandomCorner() {
             lock (_corners) {
+                if (_corners.Count <= 0)
+                    return -1;
                 int index = new Random().Next(_corners.Count);
                 int corner = _corners[index];
                 _corners.RemoveAt(index);
@@ -111,6 +113,20 @@ namespace Lobby {
 
         #endregion
         #region INotifiable Implementation Members
+
+        public void SetName(TcpClient sender, string name) {
+            int corner= GetRandomCorner();
+            if (corner < 0) {
+                //TODO: Lobby full message!
+                return;
+            }
+            Player player = new Player(Guid.NewGuid(), sender) {
+                Name = name,
+                CornerId = corner
+            };
+            player.TcpClient.Send($"[Response:Authenticated:{player.Guid}|{player.CornerId}|{player.Name}|{_lobbyId}]");
+            AddPlayer(player);
+        }
 
         public void StartGame(string guid) {
             if (_gameStarted)

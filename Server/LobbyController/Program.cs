@@ -7,10 +7,13 @@ namespace LobbyController {
             if (string.IsNullOrWhiteSpace(Properties.Settings.Default.RemoteIP))
                 throw new NullReferenceException("IP was not set in settings file.");
 
-            using (LobbyManager manager = new LobbyManager()) {
-                Console.ReadLine();
-            }
-            Console.WriteLine("Lobby manager has disposed all underlying lobbies.");
+
+
+            LobbyManager manager = new LobbyManager();
+            AppDomain.CurrentDomain.ProcessExit += delegate {
+                manager.Stop();
+                manager.Dispose();
+            };
             Console.ReadLine();
         }
 

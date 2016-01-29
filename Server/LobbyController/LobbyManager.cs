@@ -76,7 +76,7 @@ namespace LobbyController {
         #endregion
 
         #region Private Methods
-        private void Stop() {
+        public void Stop() {
             lock (Lobbies) {
                 foreach (LobbyInstance lobby in Lobbies)
                     lobby.Dispose();

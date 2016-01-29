@@ -21,7 +21,7 @@ namespace LobbyController.Com_Handler.DataProcessing.Types {
             var data = values.GetFirst();
             switch (data.Item1) {
                 case "CreateLobby":
-                    Create(sender);
+                    CreateLobby(sender);
                     break;
                 case "JoinLobby":
                     JoinLobby(sender, data.Item2);
@@ -33,10 +33,11 @@ namespace LobbyController.Com_Handler.DataProcessing.Types {
 
         }
 
-        private async void Create(IPEndPoint sender) {
+        private async void CreateLobby(IPEndPoint sender) {
             IPEndPoint lobby = await _request.CreateLobby();
             if (lobby != null)
-                _client.SendResponse(sender, lobby);
+                _client.SendResponse(sender, new IPEndPoint(IPAddress.Parse("127.0.0.1"), lobby.Port));
+                //_client.SendResponse(sender, lobby); // TODO: Remote IP
             else
                 _client.SendError(sender, Resources.ErrorStrings.MaxLobbiesReached);
         }
@@ -44,7 +45,8 @@ namespace LobbyController.Com_Handler.DataProcessing.Types {
         private void JoinLobby(IPEndPoint sender, string values) {
             IPEndPoint lobby = _request.JoinLobby(values);
             if (lobby != null)
-                _client.SendResponse(sender, lobby);
+                _client.SendResponse(sender, new IPEndPoint(IPAddress.Parse("127.0.0.1"), lobby.Port));
+                //_client.SendResponse(sender, lobby); // TODO: Remote IP
             else
                 _client.SendError(sender, "ERR1:NoSuchLobbyBitch"); //todo: resources
         }

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NetworkLibrary;
 
 namespace Lobby.Com_Handler.Data_Processing.Types {
@@ -20,6 +16,9 @@ namespace Lobby.Com_Handler.Data_Processing.Types {
             var data = values.GetFirst();
 
             switch (data.Item1) {
+                case "SetName":
+                    SetName(client, data.Item2);
+                    break;
                 case "EndTurn":
                     _notify.EndTurn(data.Item2);
                     break;
@@ -40,6 +39,9 @@ namespace Lobby.Com_Handler.Data_Processing.Types {
             }
         }
 
+        private void SetName(TcpClient sender, string values) {
+            _notify.SetName(sender, values);
+        }
         private void GameStart(string values) {
             _notify.StartGame(values);
         }
