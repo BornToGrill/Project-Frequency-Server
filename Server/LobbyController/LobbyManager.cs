@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Security.Principal;
 using System.Threading.Tasks;
 using LobbyController.Com_Handler;
 using LobbyController.Interfaces;
+using LobbyController.Security;
+using MySql.Data.MySqlClient;
 
 namespace LobbyController {
     class LobbyManager : IDisposable, IInvokable, IRequestable {
@@ -72,6 +76,48 @@ namespace LobbyController {
                         return lobby.ServerIp;
             }
             return null;
+        }
+
+        public bool CreateAccount(string username, string displayName, string passHash, string passSalt) {
+            try {
+                MySqlConnection conn =
+                    new MySqlConnection(ConfigurationManager.ConnectionStrings["database"].ConnectionString);
+                conn.Open();
+                MySqlCommand com = new MySqlCommand("INSERT INTO UserAccounts VALUES (@user, @display, @hash, @salt)",
+                    conn);
+                com.Parameters.AddWithValue("@user", username);
+                com.Parameters.AddWithValue("@display", displayName);
+                com.Parameters.AddWithValue("@hash", passHash);
+                com.Parameters.AddWithValue("@salt", passSalt);
+                com.ExecuteNonQuery();
+                return true;
+            }
+            catch {
+                return false;
+            }
+        }
+
+        public string Login(string username, string password) {
+            try {
+                MySqlConnection conn =
+                    new MySqlConnection(ConfigurationManager.ConnectionStrings["database"].ConnectionString);
+                conn.Open();
+                MySqlCommand com = new MySqlCommand("SELECT displayname, passwordHash, passwordSalt FROM UserAccounts WHERE username=@user",
+                    conn);
+                com.Parameters.AddWithValue("@user", username);
+                using (MySqlDataReader reader = com.ExecuteReader()) {
+                    reader.Read();
+                    string displayName = reader.GetString(0);
+                    string hash = reader.GetString(1);
+                    string salt = reader.GetString(2);
+                    if (Cryptography.CompareSaltHash(password, hash, salt))
+                        return displayName;
+                    return null;
+                }
+            }
+            catch {
+                return null;
+            }
         }
         #endregion
 

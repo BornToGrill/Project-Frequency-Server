@@ -6,5 +6,9 @@ namespace LobbyController.Interfaces {
 
         Task<IPEndPoint> CreateLobby();
         IPEndPoint JoinLobby(string lobbyId);
+
+        string Login(string username, string password);
+        bool CreateAccount(string username, string displayName, string passwordHash, string passwordSalt);
+
     }
 }
