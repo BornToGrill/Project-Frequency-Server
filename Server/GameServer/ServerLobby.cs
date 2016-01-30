@@ -75,8 +75,10 @@ namespace Lobby {
         public void AddPlayer(Player player) {
             lock (_players) {
                 _players.Add(player);
-                if (_players.Count == 1)
+                if (_players.Count == 1) {
                     player.IsHost = true;
+                    player.Ready = false;
+                }
             }
         }
 
@@ -129,16 +131,30 @@ namespace Lobby {
                 Name = name,
                 CornerId = corner
             };
-            player.TcpClient.Send($"[Response:Authenticated:{player.Guid}|{player.CornerId}|{player.Name}|{_lobbyId}] +" +
-                                  $"[Response:SetPlayers:{PlayerList()}]");
             AddPlayer(player);
+            player.TcpClient.Send($"[Response:Authenticated:{player.Guid}|{player.CornerId}|{player.Name}|{_lobbyId}]" +
+                                  $"[Response:SetPlayers:{PlayerList()}]");
+        }
+
+        public void PlayerReady(string guid, bool value) {
+            Player target = GetPlayer(guid);
+            if (target == null) return;
+            target.Ready = value;
+            lock(_players)
+                foreach(Player player in _players)
+                    player.TcpClient.Send($"[Lobby:SetPlayers:{PlayerList()}]");
         }
 
         public void StartGame(string guid) {
             if (_gameStarted)
                 return;
-            _gameStarted = true;
             lock (_players) {
+                if (_players.Any(x => !x.Ready && !x.IsHost))
+                    return;
+                if (!GetPlayer(guid).IsHost)
+                    return;
+
+                _gameStarted = true;
                 _currentPlayer = _players[0];
                 string playersData = string.Empty;
                 foreach (Player pl in _players)

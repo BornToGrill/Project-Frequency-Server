@@ -19,6 +19,9 @@ namespace Lobby.Com_Handler.Data_Processing.Types {
                 case "SetName":
                     SetName(client, data.Item2);
                     break;
+                case "PlayerReady":
+                    PlayerReady(data.Item2);
+                    break;
                 case "EndTurn":
                     _notify.EndTurn(data.Item2);
                     break;
@@ -47,6 +50,11 @@ namespace Lobby.Com_Handler.Data_Processing.Types {
 
         private void SetName(TcpClient sender, string values) {
             _notify.SetName(sender, values);
+        }
+
+        private void PlayerReady(string values) {
+            string[] data = values.Split(ValueDelimiter);
+            _notify.PlayerReady(data[0], bool.Parse(data[1]));
         }
         private void GameStart(string values) {
             _notify.StartGame(values);
