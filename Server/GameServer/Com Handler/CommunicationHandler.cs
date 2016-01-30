@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using Lobby.Com_Handler.Data_Processing;
 using Lobby.Com_Handler.Data_Processing.Types;
 using Lobby.Entities;
@@ -21,7 +16,7 @@ namespace Lobby.Com_Handler {
         private readonly DataProcessor _processor;
         private readonly string lobbyId;
 
-        public CommunicationHandler(string id, int port, IPlayerContainer container, INotifiable notify) { // TODO: Interface ILobby
+        public CommunicationHandler(string id, int port, IPlayerContainer container, INotifiable notify, IRequestable request) { // TODO: Interface ILobby
             lobbyId = id;
 
             _playerContainer = container;
@@ -33,7 +28,8 @@ namespace Lobby.Com_Handler {
             _udpClient.DataReceived += UdpClient_DataReceived;
             _udpClient.Start();
 
-            _processor = new DataProcessor(notify);
+            _processor = new DataProcessor(notify, request);
+            Console.WriteLine("Server started listening on port : {0}", ((IPEndPoint)_tcpListener.Socket.LocalEndPoint).Port);
         }
 
         private void SocketAccepted(SocketAcceptedEventArgs e) {

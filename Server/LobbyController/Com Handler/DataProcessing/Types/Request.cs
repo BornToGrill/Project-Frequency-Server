@@ -47,7 +47,7 @@ namespace LobbyController.Com_Handler.DataProcessing.Types {
         }
 
         private void JoinLobby(IPEndPoint sender, string values) {
-            IPEndPoint lobby = _request.JoinLobby(values);
+            IPEndPoint lobby = _request.JoinLobby(values.ToUpper());
             if (lobby != null)
                 _client.SendResponse(sender, new IPEndPoint(IPAddress.Parse("127.0.0.1"), lobby.Port));
                 //_client.SendResponse(sender, lobby); // TODO: Remote IP

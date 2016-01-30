@@ -39,6 +39,9 @@ namespace Lobby.Com_Handler.Data_Processing.Types {
                 case "GameWon":
                     GameWon(data.Item2);
                     break;
+                case "GameLoaded":
+                    GameLoaded(data.Item2);
+                    break;
             }
         }
 
@@ -71,6 +74,10 @@ namespace Lobby.Com_Handler.Data_Processing.Types {
 
         private void GameWon(string values) {
             _notify.GameWon(values);
+        }
+
+        private void GameLoaded(string values) {
+            _notify.GameLoaded(values);
         }
     }
 }

@@ -11,5 +11,6 @@ namespace Lobby.Com_Handler.Data_Processing.Types {
         void CreateUnit(string guid, string tileTarget, string unitType);
         void CashChanged(string guid, int newValue);
         void GameWon(string guid);
+        void GameLoaded(string guid);
     }
 }

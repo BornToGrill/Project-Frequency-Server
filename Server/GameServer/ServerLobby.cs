@@ -13,9 +13,10 @@ using Lobby.Interfaces;
 
 namespace Lobby {
 
-    internal sealed class ServerLobby : IPlayerContainer, INotifiable {
+    internal sealed class ServerLobby : IPlayerContainer, INotifiable, IRequestable {
 
         private readonly ObservableCollection<Player> _players;
+        private readonly List<int> _midGameDisconnects; 
         private readonly CommunicationHandler _comHandler;
 
         private List<int> _corners = Enumerable.Range(1, 4).ToList();
@@ -28,33 +29,26 @@ namespace Lobby {
 
         public ServerLobby(string id, int port) {
             _lobbyId = id;
-            _comHandler = new CommunicationHandler(id, port, this, this);
+            _comHandler = new CommunicationHandler(id, port, this, this, this);
             _players = new ObservableCollection<Player>();
             _players.CollectionChanged += Players_CollectionChanged;
-
-            //Console.WriteLine("Server started listening on port : {0}", ((IPEndPoint)_tcpListener.Socket.LocalEndPoint).Port);
+            _midGameDisconnects = new List<int>();
         }
 
         private void Players_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) {
             // TODO: TEMP
             lock (_players) {
+                if (_players.Count == 0)
+                    Environment.Exit(0);
                 if (e.NewItems == null)
                     return;
-
                 foreach (Player player in _players) {
                     Player joined = (Player) e.NewItems[0];
                     if (player != joined)
-                        player.TcpClient.Send($"[Lobby:PlayerJoined:{joined.CornerId}|{joined.Name}]");
+                        player.TcpClient.Send($"[Lobby:SetPlayers:{PlayerList()}]");
                 }
             }
             // TODO: ^^^^
-            lock (_players)
-                if (_players.Count == 0) {
-                    // TODO: Start timer.
-                }
-                else {
-                    // TODO: End timer.
-                }
         }
 
         #region IPlayerContainer Implementation Members
@@ -79,20 +73,31 @@ namespace Lobby {
         }  
 
         public void AddPlayer(Player player) {
-            lock (_players)
+            lock (_players) {
                 _players.Add(player);
+                if (_players.Count == 1)
+                    player.IsHost = true;
+            }
         }
 
         public void RemovePlayer(Player player) {
             lock (_players) {
                 _players.Remove(player);
+                if (player.IsHost) {
+                    _players[0].IsHost = true;
+                }
                 foreach (Player pl in _players)
-                    if (_gameStarted)
-                        pl.TcpClient.Send("[Notify:PlayerLeft.....]"); //TODO
-                    else
-                        pl.TcpClient.Send($"[Lobby:PlayerLeft:{player.CornerId}|{player.Name}]");
+                    if (_gameStarted) {
+                        pl.TcpClient.Send($"[Notify:PlayerLeft:{player.CornerId}|{player.Name}]");
+                        lock (_midGameDisconnects)
+                            _midGameDisconnects.Add(player.CornerId);
+                    }
+                    else {
+                        pl.TcpClient.Send($"Lobby:SetPlayers:{PlayerList()}");
+                    }
+                if (_currentPlayer == player)
+                    EndTurn(player.Guid);
             }
-
         }
 
         public int GetRandomCorner() {
@@ -124,14 +129,8 @@ namespace Lobby {
                 Name = name,
                 CornerId = corner
             };
-            string playersData = string.Empty;
-            lock (_players) {
-                foreach (Player pl in _players)
-                    playersData += $"{pl.Name}|";
-            }
-            playersData = playersData.TrimEnd('|');
             player.TcpClient.Send($"[Response:Authenticated:{player.Guid}|{player.CornerId}|{player.Name}|{_lobbyId}] +" +
-                                  $"[Response:SetPlayers:{playersData}]");
+                                  $"[Response:SetPlayers:{PlayerList()}]");
             AddPlayer(player);
         }
 
@@ -213,9 +212,34 @@ namespace Lobby {
                 Player winner = GetPlayer(guid);
                 string response = winner.CornerId + "|" +
                                   string.Join("|", _players.Where(x => x != winner).Select(c => c.CornerId).ToArray());
-                foreach(Player player in _players)
+                lock (_midGameDisconnects) {
+                    if (_midGameDisconnects.Count > 0) {
+                        response += '|' + string.Join("|", _midGameDisconnects);
+                    }
+                    _midGameDisconnects.Clear();
+                }
+                foreach (Player player in _players) {
+                    player.Reset();
                     player.TcpClient.Send($"[Notify:GameWon:{response}]");
+                }
+            }
+        }
 
+        public void GameLoaded(string guid) {
+            Console.WriteLine("Game loaded : " + guid);
+            lock (_players) {
+                Player loaded = GetPlayer(guid);
+                loaded.GameLoaded = true;
+                if(_players.All(x => x.GameLoaded))
+                    foreach(Player player in _players)
+                        player.TcpClient.Send("[Notify:GameLoaded:]"); //TODO: Check which players are still connected
+            }
+        }
+        #endregion
+        #region IRequestable Implementation Members
+        public string PlayerList() {
+            lock (_players) {
+                return string.Join("|", _players.Select(x => $"({x.Name}:{x.CornerId}:{x.Ready}:{x.IsHost})"));
             }
         }
         #endregion

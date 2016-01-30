@@ -7,6 +7,11 @@ namespace Lobby.Entities {
         internal string Name { get; set; }
         internal int CornerId { get; set; }
         internal string Guid { get; }
+
+        internal bool IsHost { get; set; }
+        internal bool Ready { get; set; }
+        internal bool GameLoaded { get; set; }
+
         internal TcpClient TcpClient { get; }
         internal IPEndPoint ClientIp { get; }
         internal bool UdpVerified { get; set; }
@@ -19,6 +24,10 @@ namespace Lobby.Entities {
             ClientIp = (IPEndPoint) tcpClient.Socket.RemoteEndPoint;
         }
 
+        public void Reset() {
+            Ready = false;
+            GameLoaded = false;
+        }
 
         #region IDisposable Implementation Members
         private void Dispose(bool disposing) {

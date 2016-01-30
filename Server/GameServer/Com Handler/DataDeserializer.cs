@@ -12,7 +12,7 @@ namespace Lobby.Com_Handler {
         internal static Tuple<string, string> GetFirst(this string data) {
             int index = data.IndexOf(DataSeparator);
             if (index < 0)
-                throw new ArgumentException("string did not contain a data separator");
+                return Tuple.Create(data, "");
             return Tuple.Create(data.Substring(0, index), data.Substring(index + 1));
         }
 
