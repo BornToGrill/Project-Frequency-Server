@@ -119,6 +119,7 @@ namespace NetworkLibrary {
             Socket.BeginReceiveFrom(_buffer, 0, BufferSize, 0, ref remoteEndPoint, Callback, remoteEndPoint);
             IsReceiving = true;
         }
+
         /// <summary>
         /// Begins to asynchronously receive data using the specified buffer size.
         /// </summary>

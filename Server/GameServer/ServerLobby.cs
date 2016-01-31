@@ -125,7 +125,12 @@ namespace Lobby {
         public void SetName(TcpClient sender, string name) {
             int corner= GetRandomCorner();
             if (corner < 0) {
-                sender.Send("[Error:ERR4:The lobby you tried to join is full]");
+                sender.Send("[Error:ERR4:The lobby you tried to join is full.]");
+                sender.Dispose();
+                return;
+            }
+            if (_gameStarted) {
+                sender.Send("[Error:ERR5:The game you tried to join is already in progress.]");
                 sender.Dispose();
                 return;
             }

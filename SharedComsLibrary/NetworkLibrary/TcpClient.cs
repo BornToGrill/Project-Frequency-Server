@@ -43,7 +43,11 @@ namespace NetworkLibrary {
         /// Gets the <see cref="System.Net.Sockets.Socket"/> that the <see cref="TcpClient"/> will be using.
         /// </summary>
         public Socket Socket { get; }
-        private const int BufferSize = 8192;    // TODO: Variable buffer size
+
+        /// <summary>
+        /// Gets the size of the internal buffer.
+        /// </summary>
+        public int BufferSize { get; private set; } = 8192;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TcpClient"/> class using the specified <see cref="System.Net.Sockets.Socket"/>.
@@ -61,6 +65,19 @@ namespace NetworkLibrary {
             if(IsDisposed)
                 throw new ObjectDisposedException(GetType().FullName);
             Socket.BeginReceive(new byte[] { 0 }, 0, 0, 0, Callback, Socket);
+        }
+
+        /// <summary>
+        /// Begins to asynchronously receive data using the specified buffer size.
+        /// </summary>
+        /// <param name="bufferSize"></param>
+        public void Start(int bufferSize) {
+            if (IsDisposed)
+                throw new ObjectDisposedException(GetType().FullName);
+            if (bufferSize < 0)
+                throw new ArgumentOutOfRangeException(nameof(bufferSize), bufferSize, $"{bufferSize} can not be less than 0");
+            BufferSize = bufferSize;
+            Start();
         }
 
         /// <summary>
@@ -107,7 +124,8 @@ namespace NetworkLibrary {
                     Close();
                     return;
                 }
-                Socket.BeginReceive(new byte[] { 0 }, 0, 0, 0, Callback, Socket);
+                if(!IsDisposed)
+                    Socket.BeginReceive(new byte[] { 0 }, 0, 0, 0, Callback, Socket);
             }
             catch (SocketException) {
                 Disconnected?.Invoke(this);
