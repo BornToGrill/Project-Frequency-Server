@@ -95,10 +95,11 @@ namespace Lobby {
                             _midGameDisconnects.Add(player.CornerId);
                     }
                     else {
-                        pl.TcpClient.Send($"Lobby:SetPlayers:{PlayerList()}");
+                        pl.TcpClient.Send($"[Lobby:SetPlayers:{PlayerList()}]");
                     }
-                if (_currentPlayer == player)
-                    EndTurn(player.Guid);
+                if(_gameStarted)
+                    if (_currentPlayer == player)
+                        EndTurn(player.Guid);
             }
         }
 

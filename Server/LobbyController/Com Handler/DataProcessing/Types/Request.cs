@@ -61,6 +61,7 @@ namespace LobbyController.Com_Handler.DataProcessing.Types {
                 _client.Send("Response:CreateAccount:Success", sender);
             }
             else {
+                _client.SendError(sender, "ERR2:Can't create account");
                 // TODO: SEND ERROR
             }
         }
@@ -72,6 +73,7 @@ namespace LobbyController.Com_Handler.DataProcessing.Types {
                 _client.Send($"Response:Login:{name}", sender);
             }
             else {
+                _client.SendError(sender, "ERR2:Invalid login");
                 // TODO: Send error
             }
         }
