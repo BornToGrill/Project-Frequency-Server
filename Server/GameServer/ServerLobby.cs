@@ -19,7 +19,7 @@ namespace Lobby {
         private readonly List<int> _midGameDisconnects; 
         private readonly CommunicationHandler _comHandler;
 
-        private List<int> _corners = Enumerable.Range(1, 4).ToList();
+        private readonly List<int> _corners = Enumerable.Range(1, 4).ToList();
 
         private Player _currentPlayer;
 
@@ -125,7 +125,8 @@ namespace Lobby {
         public void SetName(TcpClient sender, string name) {
             int corner= GetRandomCorner();
             if (corner < 0) {
-                //TODO: Lobby full message!
+                sender.Send("[Error:ERR4:The lobby you tried to join is full]");
+                sender.Dispose();
                 return;
             }
             Player player = new Player(Guid.NewGuid(), sender) {

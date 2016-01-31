@@ -40,8 +40,7 @@ namespace LobbyController.Com_Handler.DataProcessing.Types {
         private async void CreateLobby(IPEndPoint sender) {
             IPEndPoint lobby = await _request.CreateLobby();
             if (lobby != null)
-                _client.SendResponse(sender, new IPEndPoint(IPAddress.Parse("127.0.0.1"), lobby.Port));
-                //_client.SendResponse(sender, lobby); // TODO: Remote IP
+                _client.SendResponse(sender, lobby);
             else
                 _client.SendError(sender, Resources.ErrorStrings.MaxLobbiesReached);
         }
@@ -49,8 +48,7 @@ namespace LobbyController.Com_Handler.DataProcessing.Types {
         private void JoinLobby(IPEndPoint sender, string values) {
             IPEndPoint lobby = _request.JoinLobby(values.ToUpper());
             if (lobby != null)
-                _client.SendResponse(sender, new IPEndPoint(IPAddress.Parse("127.0.0.1"), lobby.Port));
-                //_client.SendResponse(sender, lobby); // TODO: Remote IP
+                _client.SendResponse(sender, lobby);
             else
                 _client.SendError(sender, "ERR1:NoSuchLobby"); //todo: resources
         }
