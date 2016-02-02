@@ -33,6 +33,9 @@ namespace Lobby.Com_Handler.Data_Processing.Types {
                 case "UnitCreated":
                     CreateUnit(data.Item2);
                     break;
+                case "SplitUnit":
+                    SplitUnit(data.Item2);
+                    break;
                 case "CashChanged":
                     CashChanged(data.Item2);
                     break;
@@ -73,6 +76,11 @@ namespace Lobby.Com_Handler.Data_Processing.Types {
         private void CreateUnit(string values) {
             string[] data = values.Split(ValueDelimiter);
             _notify.CreateUnit(data[0], data[1], data[2]);
+        }
+
+        private void SplitUnit(string values) {
+            string[] data = values.Split(ValueDelimiter);
+            _notify.SplitUnit(data[0], data[1], data[2], Int32.Parse(data[3]));
         }
 
         private void CashChanged(string values) {

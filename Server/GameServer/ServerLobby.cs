@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Net;
-using System.Security.Principal;
 using Lobby.Com_Handler;
 using Lobby.Com_Handler.Data_Processing.Types;
 using Lobby.Entities;
@@ -29,14 +27,13 @@ namespace Lobby {
 
         public ServerLobby(string id, int port) {
             _lobbyId = id;
-            _comHandler = new CommunicationHandler(id, port, this, this, this);
+            _comHandler = new CommunicationHandler(port, this, this, this);
             _players = new ObservableCollection<Player>();
             _players.CollectionChanged += Players_CollectionChanged;
             _midGameDisconnects = new List<int>();
         }
 
         private void Players_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) {
-            // TODO: TEMP
             lock (_players) {
                 if (_players.Count == 0)
                     Environment.Exit(0);
@@ -48,7 +45,6 @@ namespace Lobby {
                         player.TcpClient.Send($"[Lobby:SetPlayers:{PlayerList()}]");
                 }
             }
-            // TODO: ^^^^
         }
 
         #region IPlayerContainer Implementation Members
@@ -217,6 +213,16 @@ namespace Lobby {
                 lock (_players)
                     foreach (Player player in _players.Where(x => x != _currentPlayer))
                         player.TcpClient.Send($"[Invoke:CreateUnit:{tileTarget}|{unitType}|{_currentPlayer.CornerId}]");
+            }
+        }
+
+        public void SplitUnit(string guid, string tileOne, string tileTwo, int amount) {
+            lock (_players) {
+                Player sender = GetPlayer(guid);
+                if (sender == null)
+                    return;
+                foreach(Player player in _players.Where(x => x.Guid != sender.Guid))
+                    player.TcpClient.Send($"[Invoke:SplitUnit:{tileOne}|{tileTwo}|{amount}]");
             }
         }
 

@@ -14,10 +14,8 @@ namespace Lobby.Com_Handler {
         private readonly IPlayerContainer _playerContainer;
 
         private readonly DataProcessor _processor;
-        private readonly string lobbyId;
 
-        public CommunicationHandler(string id, int port, IPlayerContainer container, INotifiable notify, IRequestable request) { // TODO: Interface ILobby
-            lobbyId = id;
+        public CommunicationHandler(int port, IPlayerContainer container, INotifiable notify, IRequestable request) { // TODO: Interface ILobby
 
             _playerContainer = container;
             _tcpListener = new TcpListener(port);
