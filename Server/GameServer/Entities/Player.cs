@@ -11,7 +11,7 @@ namespace Lobby.Entities {
         internal bool IsHost { get; set; }
         internal bool Ready { get; set; }
         internal bool GameLoaded { get; set; }
-        internal bool IsAlive { get; set; }
+        internal bool IsAlive { get; set; } = true;
 
         internal TcpClient TcpClient { get; }
         internal IPEndPoint ClientIp { get; }
