@@ -13,6 +13,7 @@ namespace Lobby.Com_Handler.Data_Processing.Types {
         void SplitUnit(string guid, string tileOne, string tileTwo, int amount);
         void CashChanged(string guid, int newValue);
         void GameWon(string guid);
+        void GameLost(string guid);
         void GameLoaded(string guid);
     }
 }

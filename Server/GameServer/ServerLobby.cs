@@ -254,6 +254,15 @@ namespace Lobby {
             }
         }
 
+        public void GameLost(string guid) {
+            lock (_players) {
+                Player loser = GetPlayer(guid);
+                if (loser == null)
+                    return;
+                RemovePlayer(loser);
+            }
+        }
+
         public void GameLoaded(string guid) {
             Console.WriteLine("Game loaded : " + guid);
             lock (_players) {

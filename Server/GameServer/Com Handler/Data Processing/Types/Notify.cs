@@ -45,6 +45,9 @@ namespace Lobby.Com_Handler.Data_Processing.Types {
                 case "GameWon":
                     GameWon(data.Item2);
                     break;
+                case "GameLost":
+                    GameLost(data.Item2);
+                    break;
                 case "GameLoaded":
                     GameLoaded(data.Item2);
                     break;
@@ -67,11 +70,6 @@ namespace Lobby.Com_Handler.Data_Processing.Types {
             string[] data = values.Split(ValueDelimiter);
             _notify.MoveUnit(data[0], action, data[1], data[2]);
         }
-        private void MoveToEmpty(string values) {
-            string[] data = values.Split(ValueDelimiter);
-            _notify.MoveUnit(data[0], "MoveToEmpty", data[1], data[2]);
-
-        }
 
         private void CreateUnit(string values) {
             string[] data = values.Split(ValueDelimiter);
@@ -90,6 +88,10 @@ namespace Lobby.Com_Handler.Data_Processing.Types {
 
         private void GameWon(string values) {
             _notify.GameWon(values);
+        }
+
+        private void GameLost(string values) {
+            _notify.GameLost(values);
         }
 
         private void GameLoaded(string values) {
