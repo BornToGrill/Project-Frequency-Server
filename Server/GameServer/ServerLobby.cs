@@ -177,11 +177,20 @@ namespace Lobby {
                 }
                 else {
                     lock (_players) {
-                        int currentIndex = _players.IndexOf(_currentPlayer) + 1;
-                        if (currentIndex > _players.Count - 1)
-                            currentIndex = 0;
 
-                        _currentPlayer = _players[currentIndex];
+                        if (_players.All(x => !x.IsAlive)) {
+                            GameWon(_players[0].Guid);
+                            return;
+                        }
+                        do {
+                            int currentIndex = _players.IndexOf(_currentPlayer) + 1;
+                            if (currentIndex > _players.Count - 1)
+                                currentIndex = 0;
+
+                            _currentPlayer = _players[currentIndex];
+
+                        } while (!_currentPlayer.IsAlive);
+
                         foreach (Player player in _players)
                             player.TcpClient.Send($"[Notify:TurnEnd:{_currentPlayer.CornerId}|{_currentPlayer.Name}]");
                     }
@@ -259,7 +268,7 @@ namespace Lobby {
                 Player loser = GetPlayer(guid);
                 if (loser == null)
                     return;
-                RemovePlayer(loser);
+                loser.IsAlive = false;
             }
         }
 
