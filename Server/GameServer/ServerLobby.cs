@@ -247,7 +247,10 @@ namespace Lobby {
         public void GameWon(string guid) {
             _gameStarted = false;
             lock (_players) {
-                Player winner = GetPlayer(guid);
+                Player[] winners = _players.Where(x => x.IsAlive).ToArray();
+                if (winners.Length < 1)
+                    return;
+                Player winner = winners[0];
                 string response = winner.CornerId + "|" +
                                   string.Join("|", _players.Where(x => x != winner).Select(c => c.CornerId).ToArray());
                 lock (_midGameDisconnects) {
@@ -260,6 +263,8 @@ namespace Lobby {
                     player.Reset();
                     player.TcpClient.Send($"[Notify:GameWon:{response}]");
                 }
+
+
             }
         }
 
