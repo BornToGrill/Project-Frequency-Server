@@ -258,6 +258,8 @@ namespace Lobby {
         }
 
         public void GameWon(string guid) {
+            if (!_gameStarted)
+                return;
             _gameStarted = false;
             lock (_players) {
                 Player[] winners = _players.Where(x => x.IsAlive).ToArray();
