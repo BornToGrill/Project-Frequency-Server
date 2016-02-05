@@ -30,6 +30,9 @@ namespace Lobby.Com_Handler.Data_Processing.Types {
                 case "MoveToAttack":
                     MoveUnit(data.Item1, data.Item2);
                     break;
+                case "Attack":
+                    Attack(data.Item2);
+                    break;
                 case "UnitCreated":
                     CreateUnit(data.Item2);
                     break;
@@ -69,6 +72,11 @@ namespace Lobby.Com_Handler.Data_Processing.Types {
         private void MoveUnit(string action, string values) {
             string[] data = values.Split(ValueDelimiter);
             _notify.MoveUnit(data[0], action, data[1], data[2]);
+        }
+
+        private void Attack(string values) {
+            string[] data = values.Split(ValueDelimiter);
+            _notify.Attack(data[0], data[1], data[2]);
         }
 
         private void CreateUnit(string values) {

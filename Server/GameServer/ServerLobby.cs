@@ -203,7 +203,7 @@ namespace Lobby {
         public void MoveUnit(string guid, string moveType, string tileOne, string tileTwo) {
             lock (_currentPlayer) {
                 if (_currentPlayer.Guid != guid) {
-                    GetPlayer(guid).TcpClient.Send("[Error:Bitches can't be movin on other turns]");
+                    GetPlayer(guid)?.TcpClient.Send("[Error:Bitches can't be movin on other turns]");
                     return;
                 }
                 lock (_players)
@@ -211,6 +211,19 @@ namespace Lobby {
                         player.TcpClient.Send($"[Invoke:{moveType}:{tileOne}|{tileTwo}]");
             }
             
+        }
+
+        public void Attack(string guid, string tileOne, string tileTarget) {
+            lock (_currentPlayer) {
+                if (_currentPlayer.Guid != guid) {
+                    GetPlayer(guid)?.TcpClient.Send("[Error:Can't attack when it's not your turn]");
+                    return;
+                }
+                lock (_players) {
+                    foreach(Player player in _players.Where(x => x != _currentPlayer))
+                        player.TcpClient.Send($"[Invoke:Attack:{tileOne}|{tileTarget}]");
+                }
+            }
         }
 
         public void CreateUnit(string guid, string tileTarget, string unitType) {

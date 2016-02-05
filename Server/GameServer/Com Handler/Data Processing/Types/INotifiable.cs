@@ -9,6 +9,7 @@ namespace Lobby.Com_Handler.Data_Processing.Types {
         void StartGame(string guid);
         void EndTurn(string guid);
         void MoveUnit(string guid, string moveType, string tileOne, string tileTwo);
+        void Attack(string guid, string tileOne, string tileTarget);
         void CreateUnit(string guid, string tileTarget, string unitType);
         void SplitUnit(string guid, string tileOne, string tileTwo, int amount);
         void CashChanged(string guid, int newValue);
