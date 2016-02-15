@@ -18,7 +18,7 @@ Simply start the Server/LobbyController project and use a game client to connect
 # Licenses
 
 - [Project Frequency Server](LICENSE.md)
-- [MySql Connector/Net](Third party licenses/MySql Connect .NET.md)
+- [MySql Connector/Net](Third party licenses/MySql Connector .NET.md)
 
 # About
 
