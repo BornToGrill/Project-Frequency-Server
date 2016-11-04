@@ -21,6 +21,7 @@ namespace LobbyController {
         private readonly CommunicationHandler _comHandler;
 
         public LobbyManager() {
+            Console.WriteLine("Starting lobby manager.");
             Lobbies = new List<LobbyInstance>();
             _availablePorts = Enumerable.Range(9501, MaxServers).ToList();
             _comHandler = new CommunicationHandler(this, this);

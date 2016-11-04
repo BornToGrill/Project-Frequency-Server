@@ -13,6 +13,7 @@ namespace LobbyController.Com_Handler {
             _client = new UdpClient(Properties.Settings.Default.DefaultPort);
             _client.DataReceived += UdpClient_DataReceived;
             _client.Start();
+            Console.WriteLine($"Started listening on udp port: {Properties.Settings.Default.DefaultPort}");
 
             _processor = new DataProcessor(_client, invokable, requestable);
 
